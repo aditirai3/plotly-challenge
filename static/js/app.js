@@ -16,15 +16,15 @@ function init() {
           option.text(value).property("value"); 
       });
       
-      // Grab the first sample from the list to initiate
-    //   var firstName = name[0];
-    //   console.log(firstName)
+      // Select data to initiate
+      var initaldata = name[0];
+      console.log(initaldata)
 
-      //Define chart functions
-      barChart();
-      bubbleChart();
-      metadata();
-      gaugeChart();
+      //Define functions
+      barChart(initaldata);
+      bubbleChart(initaldata);
+      demographic(initaldata);
+      gaugeChart(initaldata);
 
     });
   }
@@ -39,27 +39,27 @@ function init() {
       var samples = data.samples;
       //Filter out the id, labels and sample_values
       var filteredData = samples.filter(sample => sample.id == aParam)[0];
-      var otu_ids = filteredData.otu_ids;
-      var otu_labels = filteredData.otu_labels;
-      var sample_values = filteredData.sample_values;
+      var id = filteredData.otu_ids;
+      var label = filteredData.otu_labels;
+      var value = filteredData.sample_values;
 
       //console check
-    //   console.log(otu_ids);
-    //   console.log(otu_labels);
-    //   console.log(sample_values);
+    //   console.log(id);
+    //   console.log(label);
+    //   console.log(value);
     
       // Slice the first 10 objects for plotting
       // sort in descending order
-      var ten_values = sample_values.slice(0, 10).reverse();
-      var ten_labels = otu_labels.slice(0, 10).reverse();
+      var ten_values = value.slice(0, 10).reverse();
+      var ten_labels = label.slice(0, 10).reverse();
       // Add OTU label to each ID  
-      var ten_id = otu_ids.slice(0, 10).map(otu_id => `OTU ${otu_id}`).reverse();
+      var ten_id = id.slice(0, 10).map(otu_id => `OTU ${otu_id}`).reverse();
 
       //check data on console
     //   console.log(filteredData);
-    //   console.log(top10sv);
-    //   console.log(top10ol);
-    //   console.log(top10oid);
+    //   console.log(ten_values);
+    //   console.log(ten_labels);
+    //   console.log(ten_id);
         
       // Build bar chart
       var trace1 = [
@@ -83,22 +83,23 @@ function init() {
     d3.json("samples.json").then((data) => {
       var samples = data.samples;
       var filteredData = samples.filter(sample => sample.id == aParam)[0];
-      var otu_ids = filteredData.otu_ids;
-      var otu_labels = filteredData.otu_labels;
-      var sample_values = filteredData.sample_values;
+      var id = filteredData.otu_ids;
+      var label = filteredData.otu_labels;
+      var value = filteredData.sample_values;
 
     // Build Bubble Chart
     var trace2 = [
         {
-           x: otu_ids,
-           y: sample_values,
-           text: otu_labels,
+           x: id,
+           y: value,
+           text: label,
            mode: "markers",
            automargin: true,
            marker: {
-            size: sample_values,
-            color: otu_ids,
+            size: value,
+            color: id,
             colorscale: 'Earth'
+            // referenced from https://plotly.com/javascript/colorscales/
           }
         }
       ];
@@ -107,49 +108,37 @@ function init() {
     });
   }
 
-  function metadata(sampleData) {
+  function demographic(aParam) {
     d3.json("samples.json").then((data) => {
-
-      //Grab the data to use from the metadata in the json
       var metadata = data.metadata;
       
       //Filter the data based on the ID/name given from samples
-      var filteredData = metadata.filter(sample => sample.id == sampleData)[0];
-
-      //console check
-      console.log(filteredData)
+      var filteredData = metadata.filter(sample => sample.id == aParam)[0];
       
       // Grab a reference to the dropdown select element
-      var demoPanel = d3.select("#sample-metadata");
+      var sampleData = d3.select("#sample-metadata");
   
-      // clear any existing metadata
-      demoPanel.html("");
+      // clear out existing input
+      sampleData.html("");
   
-      // Add each key and value pair to the panel
       Object.entries(filteredData).forEach(([key, value]) => {
-        demoPanel.append("h5").text(`${key}: ${value}`);
+        sampleData.append("h5").text(`${key}: ${value}`);
       });
-  
     });
   }
 
-  function optionChanged(sampleData) {
-    
-      //Run functions based on the changed value in the select option
-      hbarChart(sampleData);
-      bubbleChart(sampleData);
-      demoInfo(sampleData);
-      gaugeChart(sampleData);
+  function newValue(aParam) {
+      barChart(aParam);
+      bubbleChart(aParam);
+      demographic(aParam);
+      gaugeChart(aParam);
   }
 
-  function gaugeChart(sampleData) {
+  function gaugeChart(aParam) {
     d3.json("samples.json").then((data) => {
-
-      //Grab the data to use from the metadata in the json
       var metadata = data.metadata;
       
-      //Filter the data based on the ID/name given from samples
-      var filteredData = metadata.filter(sample => sample.id == sampleData)[0];
+      var filteredData = metadata.filter(sample => sample.id == aParam)[0];
   
       var data = [
         {
